@@ -6,6 +6,8 @@ import { Product } from 'types/product';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { BASE_URL } from 'assets/util/requests';
+import ProductInfoLoader from './ProductInfoLoader';
+import ProductDetailsLoader from './ProductDetailsLoader';
 
 type UrlParams = {
   productId: string;
@@ -14,13 +16,19 @@ const ProductDetails = () => {
 
   const { productId } = useParams<UrlParams>();
 
+  const[isLoading, setIsLoading] =useState(false);
   const [product, setProduct] = useState<Product>();
 
   useEffect(() => {
+    setIsLoading(true);
     axios.get(`${BASE_URL}/products/${productId}`)
     .then(response => {
       setProduct (response.data);
-        });
+        })
+        .finally(() => {
+          setIsLoading(false);
+        }
+        );
   }, [productId]);    
   
 
@@ -37,20 +45,28 @@ const ProductDetails = () => {
       </div>
      
       <div className="row">
-        <div className="col-xl-6"></div>
+        <div className="col-xl-6">
+          {isLoading ? <ProductInfoLoader /> :
+          <>
         <div className="img-container">
-            <img src={product?.imgUrl} 
-            alt={product?.name}/>
+            <img 
+            src={product?.imgUrl} 
+            alt={product?.name}
+            />
         </div>
         <div className="name-price-container">
             <h1>{}product?.name</h1>
             {product && <ProductPrice price={product?.price} />}
         </div>
+        </>}
+
+        </div>
         <div className="col-xl-6">
-          <div className="description-container">
+          {isLoading ? <ProductDetailsLoader /> :
+            <div className="description-container">
               <h2>Descriçao do produto</h2>
               <p>{product?.description}</p>
-          </div>
+          </div>}
         </div>
       </div>
     </div>
